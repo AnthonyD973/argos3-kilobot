@@ -54,8 +54,9 @@ void CCI_KilobotController::Init(TConfigurationNode& t_tree) {
       close(nBehaviorFD);
       /* Create a random number generator */
       m_pcRNG = CRandom::CreateRNG("argos");
-      /* Create shared memory area for master-slave communication */
-      m_nSharedMemFD = ::shm_open(("/" + GetId()).c_str(),
+      /* Create shared memory area for master-slave communication, using the parent's PID to generate a unique name */
+      std::string strParentPid = ToString(getpid());
+      m_nSharedMemFD = ::shm_open(("/" + GetId() + "_" + strParentPid).c_str(),
                                   O_RDWR | O_CREAT,
                                   S_IRUSR | S_IWUSR);
       if(m_nSharedMemFD < 0) {
@@ -88,6 +89,7 @@ void CCI_KilobotController::Init(TConfigurationNode& t_tree) {
                  GetId().c_str(),                                                     // Robot id
                  ToString(100).c_str(),                                               // Control step duration in ms
                  ToString(m_pcRNG->Uniform(CRange<UInt32>(0, 0xFFFFFFFFUL))).c_str(), // Random seed for rand_hard()
+                 strParentPid.c_str(),                                                // ARGoS' PID
                  NULL
             );
          /* If the next line is executed, it's because execl did not succeed */

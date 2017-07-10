@@ -243,16 +243,17 @@ int __kilobot_main(int argc, char* argv[]);
 #undef main
 int main(int argc, char* argv[]) {
    /* Parse arguments */
-   if(argc != 4) {
+   if(argc != 5) {
       int i;
       fprintf(stderr, "Error: %s was given %d arguments\n", argv[0], argc);
       for(i = 0; i < argc; ++i) {
          fprintf(stderr, "\tARG %d: %s\n", i, argv[i]);
       }
-      fprintf(stderr, "Usage: <script> <robot_id> <tick_length> <random_seed>\n");
+      fprintf(stderr, "Usage: <script> <robot_id> <tick_length> <random_seed> <parent_pid>\n");
       exit(1);
    }
-   kilo_str_id = strdup(argv[1]);
+   kilo_str_id = (char*)malloc(1 + strlen(argv[1]) + 1 + strlen(argv[4]) + 1);
+   sprintf(kilo_str_id, "/%s_%s", argv[1], argv[4]);
    /* Open shared memory */
    kilo_state_fd = shm_open(kilo_str_id, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
    if(kilo_state_fd < 0) {
